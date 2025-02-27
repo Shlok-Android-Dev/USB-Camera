@@ -1,0 +1,51 @@
+
+// Top-level build file where you can add configuration options common to
+// all sub-projects/modules.
+/* The declarations in buildscript are the resources required by the Gradle script itself.
+   These resources may include dependencies, third-party plugins, Maven repository addresses, etc.
+   The dependencies, repository addresses, and other information declared directly in the build.gradle
+   file are the resources required by the project itself. */
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        // Android Gradle version 3.5.2
+        classpath 'com.android.tools.build:gradle:3.5.2'
+        // Android plugin version 2.1
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+    }
+}
+
+/* allprojects applies configurations to all projects, including the Root Project.
+   subprojects applies configurations only to all Child Projects. */
+allprojects {
+    repositories {
+        google()
+        // maven { url 'http://raw.github.com/saki4510t/libcommon/master/repository/' }
+        maven { url 'http://raw.github.com/saki4510t/libcommon/master/repository/' }
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+// Using ext to add properties. In Gradle, all APIs implementing the ExtensionAware interface
+// can have properties added using ext.
+ext {
+    androidXVersion = '1.1.0'  // Variable that can be referenced to keep support libs consistent
+    commonLibVersion= '4.1.1'
+    versionCompiler = 28
+    // When target = 27, Android 9.0 is supported
+    versionTarget = 27
+    // If you want to support Android 4.4
+    // please modify it to 16
+    minSdkVersion = 21
+    versionCode = 100
+    versionNameString = '2.3.5.20210316'
+    javaSourceCompatibility = JavaVersion.VERSION_1_8
+    javaTargetCompatibility = JavaVersion.VERSION_1_8
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="spingarr">
+        <item>2.2v</item>
+        <item>2.3v</item>
+        <item>2.4v</item>
+        <item>2.5v</item>
+        <item>2.6v</item>
+        <item>2.7v</item>
+        <item>2.8v</item>
+        <item>2.9v</item>
+        <item>3.0v</item>
+    </string-array>
+</resources>
