@@ -25,7 +25,7 @@ public class Mp4MediaMuxer {
     private MediaFormat mAudioFormat;
     private boolean isVoiceClose;
 
-    // 文件路径；文件时长
+    // File path; file duration
     public Mp4MediaMuxer(String path, long durationMillis,boolean isVoiceClose) {
         String mFilePath;
         this.isVoiceClose = isVoiceClose;
@@ -59,8 +59,8 @@ public class Mp4MediaMuxer {
             if (isVideo) {
                 mVideoFormat = format;
                 mVideoTrackIndex = track;
-                // 当音频轨道添加
-                // 或者开启静音就start
+                // When an audio track is added
+                // or muted, start
                 if (isVoiceClose || mAudioTrackIndex != -1) {
                     if (VERBOSE)
                         Log.i(TAG, "both audio and video added,and muxer is started");

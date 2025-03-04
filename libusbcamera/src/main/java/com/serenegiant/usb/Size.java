@@ -31,13 +31,13 @@ import java.util.Locale;
 public class Size implements Parcelable {
 	//
 	/**
-	 * native側のuvc_raw_format_tの値, こっちは主にlibuvc用
+	 * The value of uvc_raw_format_t on the native side, this is mainly for libuvc
 	 * 9999 is still image
 	 */
 	public int type;
 	/**
-	 * native側のraw_frame_tの値, androusb用,
-	 * libuvcは対応していない
+	 * The value of raw_frame_t on the native side, for androusb,
+	 * libuvc does not support it
 	 */
 	public int frame_type;
 	public int index;
@@ -46,14 +46,14 @@ public class Size implements Parcelable {
 	public int frameIntervalType;
 	public int frameIntervalIndex;
 	public int[] intervals;
-	// ここ以下はframeIntervalTypeとintervalsから#updateFrameRateで計算する
+	// The rest of this is calculated using #updateFrameRate based on frameIntervalType and intervals.
 	public float[] fps;
 	private String frameRates;
 
 	/**
-	 * コンストラクタ
-	 * @param _type native側のraw_format_tの値, ただし9999は静止画
-	 * @param _frame_type native側のraw_frame_tの値
+	 * Constructor
+	 * @param _type The value of raw_format_t on the native side, except for 9999, which is a still image
+	 * @param _frame_type The value of raw_frame_t on the native side
 	 * @param _index
 	 * @param _width
 	 * @param _height
@@ -71,9 +71,9 @@ public class Size implements Parcelable {
 	}
 
 	/**
-	 * コンストラクタ
-	 * @param _type native側のraw_format_tの値, ただし9999は静止画
-	 * @param _frame_type native側のraw_frame_tの値
+	 * Constructor
+	 * @param _type The value of raw_format_t on the native side, except for 9999, which is a still image
+	 * @param _frame_type The value of raw_frame_t on the native side
 	 * @param _index
 	 * @param _width
 	 * @param _height
@@ -96,9 +96,9 @@ public class Size implements Parcelable {
 	}
 
 	/**
-	 * コンストラクタ
-	 * @param _type native側のraw_format_tの値, ただし9999は静止画
-	 * @param _frame_type native側のraw_frame_tの値
+	 * Constructor
+	 * @param _type The value of raw_format_t on the native side, except for 9999, which is a still image
+	 * @param _frame_type The value of raw_frame_t on the native side
 	 * @param _index
 	 * @param _width
 	 * @param _height
@@ -124,7 +124,7 @@ public class Size implements Parcelable {
 	}
 
 	/**
-	 * コピーコンストラクタ
+	 * Copy Constructor
 	 * @param other
 	 */
 	public Size(final Size other) {
@@ -146,7 +146,7 @@ public class Size implements Parcelable {
 	}
 
 	private Size(final Parcel source) {
-		// 読み取り順はwriteToParcelでの書き込み順と同じでないとダメ
+// The read order must be the same as the write order in writeToParcel.
 		type = source.readInt();
 		frame_type = source.readInt();
 		index = source.readInt();
@@ -197,7 +197,7 @@ public class Size implements Parcelable {
 	}
 
 	public void setCurrentFrameRate(final float frameRate) {
-		// 一番近いのを選ぶ
+		// Choose the closest one
 		int index = -1;
 		final int n = fps != null ? fps.length : 0;
 		for (int i = 0; i < n; i++) {
@@ -259,7 +259,7 @@ public class Size implements Parcelable {
 					}
 				}
 			} catch (final Exception e) {
-				// ignore, なんでかminとmaxが0になってるんちゃうかな
+					// ignore, why are min and max set to 0?
 				fps = null;
 			}
 		}

@@ -17,14 +17,11 @@ import android.view.Surface;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.shlok.usbcamera.R;
 import androidx.annotation.Nullable;
@@ -65,11 +62,6 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
     public SeekBar mSeekBrightness;
     @BindView(R.id.seekbar_contrast)
     public SeekBar mSeekContrast;
-//    @BindView(R.id.switch_rec_voice)
-//    public Switch mSwitchVoice;
-
-    @BindView(R.id.spinner)
-    public Spinner spinner;
 
 
     private UVCCameraHelper mCameraHelper;
@@ -82,8 +74,6 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
     private int interval;
     private int count = 1; //Timing photo counting
 
-    private LinearLayout llayoutAdvanceSetting;
-    private LinearLayout llayoutShowMore;
 
 
     private UVCCameraHelper.OnMyDevConnectListener listener = new UVCCameraHelper.OnMyDevConnectListener() {
@@ -161,6 +151,7 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
         mUVCCameraView.setCallback(this);
         mCameraHelper = UVCCameraHelper.getInstance();
         mCameraHelper.setDefaultFrameFormat(UVCCameraHelper.FRAME_FORMAT_MJPEG);
+
        // mCameraHelper.setDefaultFrameFormat(UVCCameraHelper.FRAME_FORMAT_YUYV);
         mCameraHelper.initUSBMonitor(this, mUVCCameraView, listener);
 
@@ -185,90 +176,21 @@ public class USBCameraActivity extends AppCompatActivity implements CameraDialog
             }
         });
 
-        getLED_V(spinner);
-        TextView textView2 = findViewById(R.id.textView2);
-        TextView editTextView = (EditText)findViewById(R.id.editTextNumber);
-        //Enter the interval to change interval
-        setInterval(editTextView);
+
         //Realize timed photo taking function；
         Handler handler=new Handler();
         Runnable runnable=new Runnable() {
             @Override
             public void run() {
                 showShortMsg("Take a picture!");
-                textView2.setText(String.valueOf(count++));
-                takeTimedPics();// Execute the method after sleep. If you want to modify and update the UI, you need to use Handler.
+                //takeTimedPics();// Execute the method after sleep. If you want to modify and update the UI, you need to use Handler.
                 handler.postDelayed(this, interval *1000);
             }
         };
-        //Set a timer to take photos
-        ToggleButton tbt = findViewById(R.id.toggleButton2);
-        tbt.setOnClickListener((View)->{
-            if(tbt.isChecked()){
-                String str1 = editTextView.getText().toString();
-                try{
-                    interval = Integer.parseInt(str1);
-                }catch(NumberFormatException e){
-                    tbt.setChecked(false);
-                    showShortMsg("Enter the correct number format！");
-                }
-                if(interval > 0 && interval <= 100){
-                    handler.post(runnable);
-                }
-                else {
-                    showShortMsg("Please enter a number from 1 to 100！");
-                    tbt.setChecked(false);
-                    showShortMsg("Please enter the interval time！");
-                }
-            }
-            else{
-                handler.removeCallbacks(runnable);
-            }
-        });
-    }
-
-    private void getLED_V(Spinner spinner) {
-        //get data
-        final String[] arrays = getResources ().getStringArray (R.array.spingarr);
-        //Get the adapter that comes with the system
-        ArrayAdapter<String> mSpinnerAdapter = new ArrayAdapter<String> (USBCameraActivity.this,android.R.layout.simple_spinner_dropdown_item,arrays);
-        spinner.setAdapter (mSpinnerAdapter);
-        //Add click event
-        spinner.setOnItemLongClickListener (new AdapterView.OnItemLongClickListener () {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText (USBCameraActivity.this, "哈喽" + arrays[position], Toast.LENGTH_SHORT).show ();
-                return false;
-            }
-        });
-    }
-
-    private void setInterval(TextView editTextView){
-        editTextView.addTextChangedListener(new TextWatcher(){
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                String strs = editTextView.getText().toString();
-//                //Regular restrictions restrict the input of only numbers, letters and Chinese characters
-//                String str = MethodsUtils.stringFilter2(strs, "[^A-Z0-9a-z\u4E00-\u9FA5]");
-//                if (!strs.equals(str)) {
-//                    editTextView.setText(str);
-//                    editTextView.setEms(str.length());
-//                }
-            }
-            @Override
-            public void afterTextChanged(Editable s) {
-//                String str = (String) editTextView.getText();
-//                interval = Integer.parseInt(str);
-            }
-        });
-
-
 
     }
+
+
     //Photograph
     public void takeTimedPics(){
         if (mCameraHelper == null || !mCameraHelper.isCameraOpened()) {

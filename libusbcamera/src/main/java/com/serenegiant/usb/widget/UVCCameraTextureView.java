@@ -60,7 +60,7 @@ public class UVCCameraTextureView extends AspectRatioTextureView    // API >= 14
     private Bitmap mTempBitmap;
     private boolean mReqesutCaptureStillImage;
 	private Callback mCallback;
-	// Camera分辨率宽度
+	// Camera resolution width
 
 
 	/** for calculation of frame rate */

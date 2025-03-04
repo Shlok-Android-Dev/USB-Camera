@@ -1,8 +1,7 @@
 package com.serenegiant.usb.encoder;
 
-/** 录制参数
- *
- * Created by   on 2017/10/19.
+/** Recording Parameters
+ * Created by Shlok on 2025/21/02. Jaipur, India.
  */
 
 public class RecordParams {

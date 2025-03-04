@@ -23,6 +23,7 @@
 
 package com.serenegiant.usb.encoder;
 
+import android.annotation.SuppressLint;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
@@ -60,7 +61,8 @@ public class MediaVideoBufferEncoder extends MediaEncoder implements IVideoEncod
 		encode(buffer, buffer.capacity());
     }
 
-	@Override
+	@SuppressLint("SuspiciousIndentation")
+    @Override
 	protected void prepare() throws IOException {
 		if (DEBUG) Log.i(TAG, "prepare: ");
         mTrackIndex = -1;
@@ -105,7 +107,7 @@ public class MediaVideoBufferEncoder extends MediaEncoder implements IVideoEncod
 		return bitrate;
 	}
 
-	// 选择第一个与制定MIME类型匹配的编码器
+		// Select the first encoder that matches the specified MIME type.
     @SuppressWarnings("deprecation")
 	protected final MediaCodecInfo selectVideoCodec(final String mimeType) {
     	if (DEBUG) Log.v(TAG, "selectVideoCodec:");
@@ -134,7 +136,7 @@ public class MediaVideoBufferEncoder extends MediaEncoder implements IVideoEncod
         return null;
     }
 
-    // 选择编码器支持的格式
+		// Select a format supported by the encoder
     protected static final int selectColorFormat(final MediaCodecInfo codecInfo, final String mimeType) {
 		if (DEBUG) Log.i(TAG, "selectColorFormat: ");
     	int result = 0;
@@ -159,7 +161,7 @@ public class MediaVideoBufferEncoder extends MediaEncoder implements IVideoEncod
         return result;
     }
 
-	// YUV颜色格式
+	// YUV color format
     protected static int[] recognizedFormats;
 	static {
 		recognizedFormats = new int[] {

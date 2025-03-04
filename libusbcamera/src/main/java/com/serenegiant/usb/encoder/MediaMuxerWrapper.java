@@ -32,7 +32,7 @@ public class MediaMuxerWrapper {
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public MediaMuxerWrapper(String path) throws IOException {
 		try {
-			// 保存到自定义路径还是手机默认Movies路径
+			// Save to a custom path or the default Movies path on the phone
 			if (TextUtils.isEmpty(path))
 				mOutputPath = getCaptureFile(Environment.DIRECTORY_MOVIES, ".mp4").toString();
 			mOutputPath = path;

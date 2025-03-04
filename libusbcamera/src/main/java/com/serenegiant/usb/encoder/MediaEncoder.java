@@ -15,10 +15,10 @@ import java.nio.ByteBuffer;
 public abstract class MediaEncoder implements Runnable {
 	private static final boolean DEBUG = true;	// TODO set false on release
 	private static final String TAG = "MediaEncoder";
-	public static final int TYPE_AUDIO = 0;		// 音频数据
-	public static final int TYPE_VIDEO = 1;		// 视频数据
+	public static final int TYPE_AUDIO = 0;		// Audio Data
+	public static final int TYPE_VIDEO = 1;		// Video Data
 
-	protected static final int TIMEOUT_USEC = 10000;	// 10毫秒
+	protected static final int TIMEOUT_USEC = 10000;	// 10 ms
 	protected static final int MSG_FRAME_AVAILABLE = 1;
 	protected static final int MSG_STOP_RECORDING = 9;
 	private long lastPush;
@@ -28,7 +28,7 @@ public abstract class MediaEncoder implements Runnable {
 	public interface MediaEncoderListener {
 		void onPrepared(MediaEncoder encoder);
 		void onStopped(MediaEncoder encoder);
-		// 音频或视频流，type=0为音频，type=1为视频
+		// Audio or video stream, type=0 is audio, type=1 is video
 		void onEncodeResult(byte[] data, int offset,
 							int length, long timestamp, int type);
 	}
@@ -412,8 +412,8 @@ public abstract class MediaEncoder implements Runnable {
 		while (mIsCapturing) {
             encoderStatus = mMediaCodec.dequeueOutputBuffer(mBufferInfo, TIMEOUT_USEC);
             if (encoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
-				// 等待 TIMEOUT_USEC x 5 = 50毫秒
-				// 如果还没有数据，终止循环
+				// Wait for TIMEOUT_USEC x 5 = 50 milliseconds
+				// If there is no data yet, terminate the loop
                 if (!mIsEOS) {
                 	if (++count > 5)
                 		break;
@@ -453,31 +453,31 @@ public abstract class MediaEncoder implements Runnable {
                 if (encodedData == null) {
                     throw new RuntimeException("encoderOutputBuffer " + encoderStatus + " was null");
                 }
-				// BUFFER_FLAG_CODEC_CONFIG标志
-				// BufferInfo清零
+				// BUFFER_FLAG_CODEC_CONFIG flag
+				// BufferInfo is cleared
                 if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
 					if (DEBUG) Log.d(TAG, "drain:BUFFER_FLAG_CODEC_CONFIG");
 					mBufferInfo.size = 0;
                 }
-				// BUFFER_FLAG_END_OF_STREAM标志
-				// 流结束，终止循环
+				// BUFFER_FLAG_END_OF_STREAM flag
+				// End of stream, terminate loop
 				if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
 					mMuxerStarted = mIsCapturing = false;
 					break;
 				}
-				// 有效编码数据流
+				// Efficiently encoded data stream
                 if (mBufferInfo.size != 0) {
             		count = 0;
 					if (!mMuxerStarted) {
 						throw new RuntimeException("drain:muxer hasn't started");
 					}
-					// 写入音频流或视频流到混合器
+					// Writes an audio or video stream to the mixer
 					mBufferInfo.presentationTimeUs = getPTSUs();
 					muxer.writeSampleData(mTrackIndex, encodedData, mBufferInfo);
 					prevOutputPTSUs = mBufferInfo.presentationTimeUs;
 
-					// 推流，获取h.264数据流
-					// mTrackIndex=0 视频；mTrackIndex=1 音频
+					// Push stream, get h.264 data stream
+					// mTrackIndex=0 video; mTrackIndex=1 audio
 					if(mTrackIndex == 0) {
 						encodedData.position(mBufferInfo.offset);
 						encodedData.limit(mBufferInfo.offset + mBufferInfo.size);
@@ -506,7 +506,7 @@ public abstract class MediaEncoder implements Runnable {
 								mListener.onEncodeResult(h264, 0,mPpsSps.length + mBufferInfo.size,
 										mBufferInfo.presentationTimeUs / 1000,TYPE_VIDEO);
 							}
-							// 保存数据流到文件
+							// Save data stream to file
 							FileUtils.putFileStream(h264, 0,mPpsSps.length + mBufferInfo.size);
 						} else {
 							encodedData.get(h264, 0, mBufferInfo.size);
@@ -529,7 +529,7 @@ public abstract class MediaEncoder implements Runnable {
 						}
 					}
                 }
-                // 释放输出缓存，将其还给编码器
+                // Release the output buffer and return it to the encoder
                 mMediaCodec.releaseOutputBuffer(encoderStatus, false);
             }
         }

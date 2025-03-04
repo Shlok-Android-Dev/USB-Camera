@@ -73,7 +73,7 @@ public final class USBMonitor {
 	public static final String ACTION_USB_DEVICE_ATTACHED = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
 
 	/**
-	 * openしているUsbControlBlock
+	 * Open UsbControlBlock
 	 */
 	private final ConcurrentHashMap<UsbDevice, UsbControlBlock> mCtrlBlocks = new ConcurrentHashMap<UsbDevice, UsbControlBlock>();
 	private final SparseArray<WeakReference<UsbDevice>> mHasPermissions = new SparseArray<WeakReference<UsbDevice>>();
@@ -85,12 +85,12 @@ public final class USBMonitor {
 	private List<DeviceFilter> mDeviceFilters = new ArrayList<DeviceFilter>();
 
 	/**
-	 * コールバックをワーカースレッドで呼び出すためのハンドラー
+	 * A handler for invoking callbacks in a worker thread.
 	 */
 	private final Handler mAsyncHandler;
 	private volatile boolean destroyed;
 	/**
-	 * USB機器の状態変更時のコールバックリスナー
+	 * Callback listener when the state of a USB device changes
 	 */
 	public interface OnDeviceConnectListener {
 		/**
@@ -144,7 +144,7 @@ public final class USBMonitor {
 		unregister();
 		if (!destroyed) {
 			destroyed = true;
-			// モニターしているUSB機器を全てcloseする
+			// Close all monitored USB devices.
 			final Set<UsbDevice> keys = mCtrlBlocks.keySet();
 			if (keys != null) {
 				UsbControlBlock ctrlBlock;
@@ -196,7 +196,7 @@ public final class USBMonitor {
 	 * @throws IllegalStateException
 	 */
 	public synchronized void unregister() throws IllegalStateException {
-		// 接続チェック用Runnableを削除
+		// Removed Runnable for connection check
 		mDeviceCounts = 0;
 		if (!destroyed) {
 			mAsyncHandler.removeCallbacks(mDeviceCheckRunnable);
@@ -231,7 +231,7 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * デバイスフィルターを追加
+	 * Add a device filter
 	 * @param filter
 	 * @throws IllegalStateException
 	 */
@@ -241,7 +241,7 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * デバイスフィルターを削除
+	 * Remove a device filter
 	 * @param filter
 	 * @throws IllegalStateException
 	 */
@@ -451,7 +451,7 @@ public final class USBMonitor {
 	/**
 	 * return whether the specific Usb device has permission
 	 * @param device
-	 * @return true: 指定したUsbDeviceにパーミッションがある
+	 * @return true: The specified UsbDevice has permission.
 	 * @throws IllegalStateException
 	 */
 	public final boolean hasPermission(final UsbDevice device) throws IllegalStateException {
@@ -460,7 +460,7 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * 内部で保持しているパーミッション状態を更新
+	 * Update the internal permission status
 	 * @param device
 	 * @param hasPermission
 	 * @return hasPermission
@@ -494,10 +494,10 @@ public final class USBMonitor {
 					processConnect(device);
 				} else {
 					try {
-						// パーミッションがなければ要求する
+						// If permission is not available, request it
 						mUsbManager.requestPermission(device, mPermissionIntent);
 					} catch (final Exception e) {
-						// Android5.1.xのGALAXY系でandroid.permission.sec.MDM_APP_MGMTという意味不明の例外生成するみたい
+					// Android 5.1.x GALAXY systems seem to generate an incomprehensible exception called android.permission.sec.MDM_APP_MGMT
 						Log.w(TAG, e);
 						processCancel(device);
 						result = true;
@@ -515,16 +515,16 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * 指定したUsbDeviceをopenする
+		 * Opens the specified UsbDevice.
 	 * @param device
 	 * @return
-	 * @throws SecurityException パーミッションがなければSecurityExceptionを投げる
+	 * @throws SecurityException If permission is not granted, a SecurityException is thrown.
 	 */
 	public UsbControlBlock openDevice(final UsbDevice device) throws SecurityException {
 		if (hasPermission(device)) {
 			UsbControlBlock result = mCtrlBlocks.get(device);
 			if (result == null) {
-				result = new UsbControlBlock(USBMonitor.this, device);    // この中でopenDeviceする
+				result = new UsbControlBlock(USBMonitor.this, device);    // OpenDevice in this
 				mCtrlBlocks.put(device, result);
 			}
 			return result;
@@ -684,10 +684,10 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * USB機器毎の設定保存用にデバイスキー名を生成する。
-	 * ベンダーID, プロダクトID, デバイスクラス, デバイスサブクラス, デバイスプロトコルから生成
-	 * 同種の製品だと同じキー名になるので注意
-	 * @param device nullなら空文字列を返す
+	 * Generates a device key name for saving settings for each USB device.
+	 * Generates from vendor ID, product ID, device class, device subclass, and device protocol.
+	 * Note that the same key name will be used for the same type of product.
+	 * @param device Returns an empty string if null.
 	 * @return
 	 */
 	public static final String getDeviceKeyName(final UsbDevice device) {
@@ -695,8 +695,8 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * USB機器毎の設定保存用にデバイスキー名を生成する。
-	 * useNewAPI=falseで同種の製品だと同じデバイスキーになるので注意
+	 * Generates a device key name for saving settings for each USB device.
+	 * Note that if useNewAPI=false, the same device key will be used for the same product.
 	 * @param device
 	 * @param useNewAPI
 	 * @return
@@ -705,14 +705,14 @@ public final class USBMonitor {
 		return getDeviceKeyName(device, null, useNewAPI);
 	}
 	/**
-	 * USB機器毎の設定保存用にデバイスキー名を生成する。この機器名をHashMapのキーにする
-	 * UsbDeviceがopenしている時のみ有効
-	 * ベンダーID, プロダクトID, デバイスクラス, デバイスサブクラス, デバイスプロトコルから生成
-	 * serialがnullや空文字でなければserialを含めたデバイスキー名を生成する
-	 * useNewAPI=trueでAPIレベルを満たしていればマニュファクチャ名, バージョン, コンフィギュレーションカウントも使う
-	 * @param device nullなら空文字列を返す
-	 * @param serial	UsbDeviceConnection#getSerialで取得したシリアル番号を渡す, nullでuseNewAPI=trueでAPI>=21なら内部で取得
-	 * @param useNewAPI API>=21またはAPI>=23のみで使用可能なメソッドも使用する(ただし機器によってはnullが返ってくるので有効かどうかは機器による)
+	 * Generates a device key name for saving settings for each USB device. Use this device name as the key for the HashMap
+	 * Valid only when UsbDevice is open
+	 * Generates from vendor ID, product ID, device class, device subclass, and device protocol
+	 * Generates a device key name including serial if serial is not null or an empty string
+	 * If useNewAPI=true and the API level is met, also uses manufacturer name, version, and configuration count
+	 * @param device Returns an empty string if null
+	 * @param serial Passes the serial number obtained with UsbDeviceConnection#getSerial; if null, useNewAPI=true, and API>=21, obtains it internally
+	 * @param useNewAPI Also uses methods that can only be used with API>=21 or API>=23 (however, depending on the device, null may be returned, so whether it is valid or not depends on the device)
 	 * @return
 	 */
 	@SuppressLint("NewApi")
@@ -743,11 +743,11 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * デバイスキーを整数として取得
-	 * getDeviceKeyNameで得られる文字列のhasCodeを取得
-	 * ベンダーID, プロダクトID, デバイスクラス, デバイスサブクラス, デバイスプロトコルから生成
-	 * 同種の製品だと同じデバイスキーになるので注意
-	 * @param device nullなら0を返す
+	 * Get the device key as an integer
+	 * Get the hasCode of the string obtained by getDeviceKeyName
+	 * Generated from vendor ID, product ID, device class, device subclass, and device protocol
+	 * Note that the same device key will be used for the same type of product
+	 * @param device Returns 0 if null
 	 * @return
 	 */
 	public static final int getDeviceKey(final UsbDevice device) {
@@ -755,9 +755,9 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * デバイスキーを整数として取得
-	 * getDeviceKeyNameで得られる文字列のhasCodeを取得
-	 * useNewAPI=falseで同種の製品だと同じデバイスキーになるので注意
+	 * Get the device key as an integer
+	 * Get the hasCode of the string obtained by getDeviceKeyName
+	 * Note that if useNewAPI=false, the same device key will be used for the same product
 	 * @param device
 	 * @param useNewAPI
 	 * @return
@@ -767,12 +767,12 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * デバイスキーを整数として取得
-	 * getDeviceKeyNameで得られる文字列のhasCodeを取得
-	 * serialがnullでuseNewAPI=falseで同種の製品だと同じデバイスキーになるので注意
-	 * @param device nullなら0を返す
-	 * @param serial UsbDeviceConnection#getSerialで取得したシリアル番号を渡す, nullでuseNewAPI=trueでAPI>=21なら内部で取得
-	 * @param useNewAPI API>=21またはAPI>=23のみで使用可能なメソッドも使用する(ただし機器によってはnullが返ってくるので有効かどうかは機器による)
+	 * Get the device key as an integer
+	 * Get the hasCode of the string obtained by getDeviceKeyName
+	 * Note that if serial is null and useNewAPI=false, the same device key will be used for the same product
+	 * @param device Returns 0 if null
+	 * @param serial Passes the serial number obtained by UsbDeviceConnection#getSerial, if null, useNewAPI=true and API>=21, it will be obtained internally
+	 * @param useNewAPI Also uses methods that can only be used with API>=21 or API>=23 (however, depending on the device, null will be returned, so whether it is valid or not depends on the device)
 	 * @return
 	 */
 	public static final int getDeviceKey(final UsbDevice device, final String serial, final boolean useNewAPI) {
@@ -893,7 +893,7 @@ public final class USBMonitor {
 	private static final int USB_DT_DEVICE_SIZE = 18;
 
 	/**
-	 * 指定したIDのStringディスクリプタから文字列を取得する。取得できなければnull
+	 * Gets the string from the String descriptor with the specified ID. If not available, returns null.
 	 * @param connection
 	 * @param id
 	 * @param languageCount
@@ -912,7 +912,7 @@ public final class USBMonitor {
 				// skip first two bytes(bLength & bDescriptorType), and copy the rest to the string
 				try {
 					result = new String(work, 2, ret - 2, "UTF-16LE");
-					if (!"Љ".equals(result)) {	// 変なゴミが返ってくる時がある
+					if (!"Љ".equals(result)) {	// Sometimes strange garbage is returned.
 						break;
 					} else {
 						result = null;
@@ -926,7 +926,7 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * ベンダー名・製品名・バージョン・シリアルを取得する
+	 * Get vendor name, product name, version and serial number
 	 * @param device
 	 * @return
 	 */
@@ -935,8 +935,8 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * ベンダー名・製品名・バージョン・シリアルを取得する
-	 * #updateDeviceInfo(final UsbManager, final UsbDevice, final UsbDeviceInfo)のヘルパーメソッド
+	 * Gets the vendor name, product name, version, and serial number.
+	 * Helper method for #updateDeviceInfo(final UsbManager, final UsbDevice, final UsbDeviceInfo)
 	 * @param context
 	 * @param device
 	 * @return
@@ -946,7 +946,7 @@ public final class USBMonitor {
 	}
 
 	/**
-	 * ベンダー名・製品名・バージョン・シリアルを取得する
+	 * Get vendor name, product name, version and serial number
 	 * @param manager
 	 * @param device
 	 * @param _info

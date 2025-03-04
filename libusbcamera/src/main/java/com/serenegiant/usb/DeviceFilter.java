@@ -332,8 +332,8 @@ public final class DeviceFilter {
 	} */
 
 	/**
-	 * 指定したクラス・サブクラス・プロトコルがこのDeviceFilterとマッチするかどうかを返す
-	 * mExcludeフラグは別途#isExcludeか自前でチェックすること
+	 * Specify the device filter and the device filter
+	 * Check the mExclude flag yourself with #isExclude
 	 * @param clasz
 	 * @param subclass
 	 * @param protocol
@@ -345,8 +345,8 @@ public final class DeviceFilter {
 	}
 
 	/**
-	 * 指定したUsbDeviceがこのDeviceFilterにマッチするかどうかを返す
-	 * mExcludeフラグは別途#isExcludeか自前でチェックすること
+	 * Returns whether the specified UsbDevice matches this DeviceFilter.
+	 * Check the mExclude flag yourself using #isExclude.
 	 * @param device
 	 * @return
 	 */
@@ -391,7 +391,7 @@ public final class DeviceFilter {
 	}
 
 	/**
-	 * このDeviceFilterに一致してかつmExcludeがtrueならtrueを返す
+	 * Returns true if this DeviceFilter matches and mExclude is true.
 	 * @param device
 	 * @return
 	 */
@@ -400,7 +400,7 @@ public final class DeviceFilter {
 	}
 
 	/**
-	 * これって要らんかも, equalsでできる気が
+	 * I don't think I need this, I think I can do it with equals
 	 * @param f
 	 * @return
 	 */

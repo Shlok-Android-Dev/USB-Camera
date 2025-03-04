@@ -59,7 +59,7 @@ public class UVCCamera {
 	public static final int PIXEL_FORMAT_RGB565 = 2;
 	public static final int PIXEL_FORMAT_RGBX = 3;
 	public static final int PIXEL_FORMAT_YUV420SP = 4;	// NV12
-	public static final int PIXEL_FORMAT_NV21 = 5;		// = YVU420SemiPlanar,NV21，但是保存到jpg颜色失真
+	public static final int PIXEL_FORMAT_NV21 = 5;		// = YVU420SemiPlanar,NV21，But when saved to jpg, the color is distorted
 
 	//--------------------------------------------------------------------------------
     public static final int	CTRL_SCANNING		= 0x00000001;	// D0:  Scanning Mode
@@ -125,8 +125,8 @@ public class UVCCamera {
 	}
 
 	private UsbControlBlock mCtrlBlock;
-    protected long mControlSupports;			// カメラコントロールでサポートしている機能フラグ
-    protected long mProcSupports;				// プロセッシングユニットでサポートしている機能フラグ
+    protected long mControlSupports;			// Feature flags supported by camera control
+	protected long mProcSupports; // Feature flags supported by the processing unit
     protected int mCurrentFrameFormat = FRAME_FORMAT_MJPEG;
 	protected int mCurrentWidth = DEFAULT_PREVIEW_WIDTH, mCurrentHeight = DEFAULT_PREVIEW_HEIGHT;
 	protected float mCurrentBandwidthFactor = DEFAULT_BANDWIDTH;
@@ -919,12 +919,12 @@ public class UVCCamera {
 	public synchronized void updateCameraParams() {
     	if (mNativePtr != 0) {
     		if ((mControlSupports == 0) || (mProcSupports == 0)) {
-        		// サポートしている機能フラグを取得
+        		// Get supported feature flags
     			if (mControlSupports == 0)
     				mControlSupports = nativeGetCtrlSupports(mNativePtr);
     			if (mProcSupports == 0)
     				mProcSupports = nativeGetProcSupports(mNativePtr);
-    	    	// 設定値を取得
+    	    	// Get a setting value
     	    	if ((mControlSupports != 0) && (mProcSupports != 0)) {
 	    	    	nativeUpdateBrightnessLimit(mNativePtr);
 	    	    	nativeUpdateContrastLimit(mNativePtr);

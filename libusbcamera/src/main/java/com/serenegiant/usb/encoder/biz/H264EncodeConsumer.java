@@ -16,8 +16,8 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 
 /**
- * 对YUV视频流进行编码
- * Created by   on 2017/5/6.
+ * Encode YUV video stream
+ * Created by Shlok on 2025/21/02. Jaipur, India.
  */
 
 @SuppressWarnings("deprecation")
@@ -25,11 +25,11 @@ public class H264EncodeConsumer extends Thread {
     private static final boolean DEBUG = false;
     private static final String TAG = "H264EncodeConsumer";
     private static final String MIME_TYPE = "video/avc";
-    // 间隔1s插入一帧关键帧
+    // Insert a key frame every 1s
     private static final int FRAME_INTERVAL = 1;
-    // 绑定编码器缓存区超时时间为10s
+    // The bound encoder buffer timeout is 10s
     private static final int TIMES_OUT = 10000;
-    // 硬编码器
+    // Hard encoder
     private MediaCodec mMediaCodec;
     private int mColorFormat;
     private boolean isExit = false;
@@ -90,7 +90,7 @@ public class H264EncodeConsumer extends Thread {
                 if (time > 0)
                     Thread.sleep(time / 2);
             }
-            // 将数据写入编码器
+            // Writing data to the encoder
 
             feedMediaCodecData(nv12ToNV21(yuvData, mWidth, mHeight));
 
@@ -135,15 +135,15 @@ public class H264EncodeConsumer extends Thread {
         if (!isEncoderStart) {
             startMediaCodec();
         }
-        // 休眠200ms，等待音频线程开启
-        // 否则视频第一秒会卡住
+        // Sleep for 200ms, waiting for the audio thread to start
+// Otherwise the video will freeze in the first second
         try {
             Thread.sleep(200);
         } catch (InterruptedException e1) {
             e1.printStackTrace();
         }
 
-        // 如果编码器没有启动或者没有图像数据，线程阻塞等待
+        // If the encoder is not started or there is no image data, the thread blocks and waits
         while (!isExit) {
             MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
             int outputBufferIndex = 0;
@@ -203,7 +203,7 @@ public class H264EncodeConsumer extends Thread {
                             listener.onEncodeResult(h264, 0, mPpsSps.length + bufferInfo.size, bufferInfo.presentationTimeUs / 1000);
                         }
 
-                        // 添加视频流到混合器
+                            // Adding a video stream to the mixer
                         if (mMuxerRef != null) {
                             Mp4MediaMuxer muxer = mMuxerRef.get();
                             if (muxer != null) {
@@ -219,7 +219,7 @@ public class H264EncodeConsumer extends Thread {
                         if (listener != null) {
                             listener.onEncodeResult(h264, 0, bufferInfo.size, bufferInfo.presentationTimeUs / 1000);
                         }
-                        // 添加视频流到混合器
+                        // Adding a video stream to the mixer
                         if (isAddKeyFrame && mMuxerRef != null) {
                             Mp4MediaMuxer muxer = mMuxerRef.get();
                             if (muxer != null) {
@@ -227,7 +227,7 @@ public class H264EncodeConsumer extends Thread {
                             }
                         }
                         if (DEBUG)
-                            Log.i(TAG, "普通帧 h264.length = " + h264.length + "  bufferInfo.size = " + bufferInfo.size);
+                            Log.i(TAG, "Normal frame h264.length = " + h264.length + "  bufferInfo.size = " + bufferInfo.size);
                     }
                     mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
                 }
@@ -381,9 +381,9 @@ public class H264EncodeConsumer extends Thread {
         byte[] ret = new byte[width * height * 3 / 2];
         int total = width * height;
 
-        ByteBuffer bufferY = ByteBuffer.wrap(ret, 0, total);         // I420的Y分量
-        ByteBuffer bufferU = ByteBuffer.wrap(ret, total, total / 4); // I420的U分量
-        ByteBuffer bufferV = ByteBuffer.wrap(ret, total + total / 4, total / 4); // I420的V分量
+        ByteBuffer bufferY = ByteBuffer.wrap(ret, 0, total);         // Y component of I420
+        ByteBuffer bufferU = ByteBuffer.wrap(ret, total, total / 4); // U component of I420
+        ByteBuffer bufferV = ByteBuffer.wrap(ret, total + total / 4, total / 4); // V component of I420
         // NV21 YYYYYYYY VUVU
         bufferY.put(data, 0, total);
         for (int i = total; i < data.length; i += 2) {
@@ -398,9 +398,9 @@ public class H264EncodeConsumer extends Thread {
         byte[] ret = new byte[width * height * 3 / 2];
         int total = width * height;
 
-        ByteBuffer bufferY = ByteBuffer.wrap(ret, 0, total);         // I420的Y分量
-        ByteBuffer bufferU = ByteBuffer.wrap(ret, total, total / 4); // I420的U分量
-        ByteBuffer bufferV = ByteBuffer.wrap(ret, total + total / 4, total / 4); // I420的V分量
+        ByteBuffer bufferY = ByteBuffer.wrap(ret, 0, total);         // Y component of I420
+            ByteBuffer bufferU = ByteBuffer.wrap(ret, total, total / 4); // U component of I420
+            ByteBuffer bufferV = ByteBuffer.wrap(ret, total + total / 4, total / 4); // V component of I420
 
         // NV12 YYYYYYYY UVUV
         bufferY.put(data, 0, total);
@@ -415,9 +415,9 @@ public class H264EncodeConsumer extends Thread {
         byte[] ret = new byte[width * height * 3 / 2];
         int total = width * height;
 
-        ByteBuffer bufferY = ByteBuffer.wrap(ret, 0, total);         // I420的Y分量
-        ByteBuffer bufferU = ByteBuffer.wrap(ret, total, total / 4); // I420的U分量
-        ByteBuffer bufferV = ByteBuffer.wrap(ret, total + total / 4, total / 4); // I420的V分量
+        ByteBuffer bufferY = ByteBuffer.wrap(ret, 0, total);         // Y component of I420
+        ByteBuffer bufferU = ByteBuffer.wrap(ret, total, total / 4); // U component of I420
+        ByteBuffer bufferV = ByteBuffer.wrap(ret, total + total / 4, total / 4); // V component of I420
 
         // NV12 YYYYYYYY UVUV
         bufferY.put(data, 0, total);
@@ -448,9 +448,9 @@ public class H264EncodeConsumer extends Thread {
         byte[] ret = new byte[width * height * 3 /2];
         int framesize = width * height;
         int i = 0, j = 0;
-        // 拷贝Y分量
+        // Copy the Y component
         System.arraycopy(nv12, 0,ret , 0, framesize);
-        // 拷贝UV分量
+        // Copy UV Components
         for (j = framesize; j < nv12.length; j += 2) {
             ret[j] = nv12[j+1];
             ret[j+1] = nv12[j];

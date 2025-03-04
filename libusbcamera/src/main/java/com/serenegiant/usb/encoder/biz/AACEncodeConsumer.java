@@ -29,16 +29,16 @@ public class AACEncodeConsumer extends Thread{
     private static final String TAG = "TMPU";
     private static final String MIME_TYPE = "audio/mp4a-latm";
     private static final long TIMES_OUT = 1000;
-    private static final int SAMPLE_RATE = 8000;     // 采样率
-    private static final int BIT_RATE = 16000;       // 比特率
-    private static final int BUFFER_SIZE = 1920;     // 最小缓存
+    private static final int SAMPLE_RATE = 8000;     // Sampling rate
+    private static final int BIT_RATE = 16000;       // Bit rate
+    private static final int BUFFER_SIZE = 1920;     // Minimum Cache
     private int outChannel = 1;
     private int bitRateForLame = 32;
     private int qaulityDegree = 7;
     private int bufferSizeInBytes;
 
-    private AudioRecord mAudioRecord; // 音频采集
-    private MediaCodec mAudioEncoder;   // 音频编码
+    private AudioRecord mAudioRecord; // Audio Capture
+    private MediaCodec mAudioEncoder;   // Audio Coding
     private OnAACEncodeResultListener listener;
     private  int mSamplingRateIndex = 0;//ADTS
     private boolean isEncoderStart = false;
@@ -76,7 +76,7 @@ public class AACEncodeConsumer extends Thread{
 
     private FileOutputStream fops;
 
-    // 编码流结果回调接口
+    // Encoding stream result callback interface
     public interface OnAACEncodeResultListener{
         void onEncodeResult(byte[] data, int offset,
                             int length, long timestamp);
@@ -109,28 +109,28 @@ public class AACEncodeConsumer extends Thread{
 
     @Override
     public void run() {
-        // 开启音频采集、编码
+        // Enable audio capture and encoding
         if(! isEncoderStart){
             initAudioRecord();
             initMediaCodec();
         }
-        // 初始化音频文件参数
+        // Initialize audio file parameters
         byte[] mp3Buffer = new byte[1024];
 
-        // 这里有问题，当本地录制结束后，没有写入
+        // There is a problem here. When the local recording is finished, nothing is written.
         while(! isExit){
             byte[] audioBuffer = new byte[2048];
-            // 采集音频
+            // Capture Audio
             int readBytes = mAudioRecord.read(audioBuffer,0,BUFFER_SIZE);
 
             if(DEBUG)
-                Log.i(TAG,"采集音频readBytes = "+readBytes);
-            // 编码音频
+                Log.i(TAG,"Collect audio readBytes = "+readBytes);
+            // Encoding Audio
             if(readBytes > 0){
                 encodeBytes(audioBuffer,readBytes);
             }
         }
-        // 停止音频采集、编码
+        // Stop audio capture and encoding
         stopMediaCodec();
         stopAudioRecord();
     }
@@ -140,17 +140,17 @@ public class AACEncodeConsumer extends Thread{
     private void encodeBytes(byte[] audioBuf, int readBytes) {
         ByteBuffer[] inputBuffers = mAudioEncoder.getInputBuffers();
         ByteBuffer[] outputBuffers = mAudioEncoder.getOutputBuffers();
-        //返回编码器的一个输入缓存区句柄，-1表示当前没有可用的输入缓存区
+        //Returns an input buffer handle of the encoder. -1 means there is no input buffer available.
         int inputBufferIndex = mAudioEncoder.dequeueInputBuffer(TIMES_OUT);
         if(inputBufferIndex >= 0){
-            // 绑定一个被空的、可写的输入缓存区inputBuffer到客户端
+// Bind an empty, writable input buffer inputBuffer to the client
             ByteBuffer inputBuffer  = null;
             if(!isLollipop()){
                 inputBuffer = inputBuffers[inputBufferIndex];
             }else{
                 inputBuffer = mAudioEncoder.getInputBuffer(inputBufferIndex);
             }
-            // 向输入缓存区写入有效原始数据，并提交到编码器中进行编码处理
+            // Write valid raw data to the input buffer and submit it to the encoder for encoding
             if(audioBuf==null || readBytes<=0){
                 mAudioEncoder.queueInputBuffer(inputBufferIndex,0,0,getPTSUs(),MediaCodec.BUFFER_FLAG_END_OF_STREAM);
             }else{
@@ -160,8 +160,8 @@ public class AACEncodeConsumer extends Thread{
             }
         }
 
-        // 返回一个输出缓存区句柄，当为-1时表示当前没有可用的输出缓存区
-        // mBufferInfo参数包含被编码好的数据，timesOut参数为超时等待的时间
+// Returns an output buffer handle. When -1, it means there is no available output buffer.
+// The mBufferInfo parameter contains the encoded data, and the timesOut parameter is the timeout waiting time.
         MediaCodec.BufferInfo  mBufferInfo = new MediaCodec.BufferInfo();
         int outputBufferIndex = -1;
         do{
@@ -170,14 +170,14 @@ public class AACEncodeConsumer extends Thread{
                 if(DEBUG)
                     Log.i(TAG,"获得编码器输出缓存区超时");
             }else if(outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED){
-                // 如果API小于21，APP需要重新绑定编码器的输入缓存区；
-                // 如果API大于21，则无需处理INFO_OUTPUT_BUFFERS_CHANGED
+                // If the API is less than 21, the APP needs to rebind the encoder's input buffer;
+                // If the API is greater than 21, there is no need to process INFO_OUTPUT_BUFFERS_CHANGED
                 if(!isLollipop()){
                     outputBuffers = mAudioEncoder.getOutputBuffers();
                 }
             }else if(outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED){
-                // 编码器输出缓存区格式改变，通常在存储数据之前且只会改变一次
-                // 这里设置混合器视频轨道，如果音频已经添加则启动混合器（保证音视频同步）
+                // The encoder output buffer format changes, usually before storing data and only once
+                // Set the mixer video track here, and start the mixer if audio has been added (to ensure audio and video synchronization)
                 if(DEBUG)
                     Log.i(TAG,"编码器输出缓存区格式改变，添加视频轨道到混合器");
                 synchronized (AACEncodeConsumer.this) {
@@ -190,19 +190,19 @@ public class AACEncodeConsumer extends Thread{
                     }
                 }
             }else{
-                // 当flag属性置为BUFFER_FLAG_CODEC_CONFIG后，说明输出缓存区的数据已经被消费了
+                // When the flag attribute is set to BUFFER_FLAG_CODEC_CONFIG, it means that the data in the output buffer has been consumed.
                 if((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0){
                     if(DEBUG)
                         Log.i(TAG,"编码数据被消费，BufferInfo的size属性置0");
                     mBufferInfo.size = 0;
                 }
-                // 数据流结束标志，结束本次循环
+                // Data stream end mark, end this cycle
                 if((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0){
                     if(DEBUG)
                         Log.i(TAG,"数据流结束，退出循环");
                     break;
                 }
-                // 获取一个只读的输出缓存区inputBuffer ，它包含被编码好的数据
+                // Get a read-only output buffer inputBuffer, which contains the encoded data
                 ByteBuffer mBuffer = ByteBuffer.allocate(10240);
                 ByteBuffer outputBuffer = null;
                 if(!isLollipop()){
@@ -211,31 +211,31 @@ public class AACEncodeConsumer extends Thread{
                     outputBuffer  = mAudioEncoder.getOutputBuffer(outputBufferIndex);
                 }
                 if(mBufferInfo.size != 0){
-                    // 获取输出缓存区失败，抛出异常
+                    // Failed to obtain the output buffer, throwing an exception
                     if(outputBuffer == null){
                         throw new RuntimeException("encodecOutputBuffer"+outputBufferIndex+"was null");
                     }
-                    // 添加视频流到混合器
+                    // Adding a video stream to the mixer
                     if(mMuxerRef != null){
                         Mp4MediaMuxer muxer = mMuxerRef.get();
                         if (muxer != null) {
                             muxer.pumpStream(outputBuffer, mBufferInfo, false);
                         }
                     }
-                    // AAC流添加ADTS头，缓存到mBuffer
+                    // Add ADTS header to AAC stream and cache it in mBuffer
                     mBuffer.clear();
                     outputBuffer.get(mBuffer.array(), 7, mBufferInfo.size);
                     outputBuffer.clear();
                     mBuffer.position(7 + mBufferInfo.size);
                     addADTStoPacket(mBuffer.array(), mBufferInfo.size + 7);
                     mBuffer.flip();
-                    // 将AAC回调给MainModelImpl进行push
+                    // Push AAC callback to MainModelImpl
                     if(listener != null){
-                        Log.i(TAG,"----->得到aac数据流<-----");
+                        Log.i(TAG,"----->Get aac data stream<-----");
                         listener.onEncodeResult(mBuffer.array(),0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000);
                     }
                 }
-                // 处理结束，释放输出缓存区资源
+                // Processing is completed, and output buffer resources are released
                 mAudioEncoder.releaseOutputBuffer(outputBufferIndex,false);
             }
         }while (outputBufferIndex >= 0);
@@ -243,8 +243,8 @@ public class AACEncodeConsumer extends Thread{
 
     private void initAudioRecord(){
         if(DEBUG)
-            Log.d(TAG,"AACEncodeConsumer-->开始采集音频");
-        // 设置进程优先级
+            Log.d(TAG,"AACEncodeConsumer-->Start capturing audio");
+        // Setting process priority
         Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
         int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
@@ -270,16 +270,16 @@ public class AACEncodeConsumer extends Thread{
 
     private void initMediaCodec(){
         if(DEBUG)
-            Log.d(TAG,"AACEncodeConsumer-->开始编码音频");
+            Log.d(TAG,"AACEncodeConsumer-->Start encoding audio");
         MediaCodecInfo mCodecInfo = selectSupportCodec(MIME_TYPE);
         if(mCodecInfo == null){
-            Log.e(TAG,"编码器不支持"+MIME_TYPE+"类型");
+            Log.e(TAG,"The encoder does not support the "+MIME_TYPE+" type");
             return;
         }
         try{
             mAudioEncoder = MediaCodec.createByCodecName(mCodecInfo.getName());
         }catch(IOException e){
-            Log.e(TAG,"创建编码器失败"+e.getMessage());
+            Log.e(TAG,"Failed to create encoder"+e.getMessage());
             e.printStackTrace();
         }
         MediaFormat format = new MediaFormat();
@@ -296,7 +296,7 @@ public class AACEncodeConsumer extends Thread{
 
     private void stopAudioRecord() {
         if(DEBUG)
-            Log.d(TAG,"AACEncodeConsumer-->停止采集音频");
+            Log.d(TAG,"AACEncodeConsumer-->Stop collecting audio");
         if(mAudioRecord != null){
             mAudioRecord.stop();
             mAudioRecord.release();
@@ -306,7 +306,7 @@ public class AACEncodeConsumer extends Thread{
 
     private void stopMediaCodec() {
         if(DEBUG)
-            Log.d(TAG,"AACEncodeConsumer-->停止编码音频");
+            Log.d(TAG,"AACEncodeConsumer-->Stop encoding audio");
         if(mAudioEncoder != null){
             mAudioEncoder.stop();
             mAudioEncoder.release();
@@ -334,18 +334,18 @@ public class AACEncodeConsumer extends Thread{
     }
 
     /**
-     * 遍历所有编解码器，返回第一个与指定MIME类型匹配的编码器
-     *  判断是否有支持指定mime类型的编码器
+     * Traverse all codecs and return the first encoder that matches the specified MIME type
+     * Determine whether there is an encoder that supports the specified mime type
      * */
     private MediaCodecInfo selectSupportCodec(String mimeType){
         int numCodecs = MediaCodecList.getCodecCount();
         for (int i = 0; i < numCodecs; i++) {
             MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
-            // 判断是否为编码器，否则直接进入下一次循环
+            // Determine whether it is an encoder, otherwise enter the next cycle directly
             if (!codecInfo.isEncoder()) {
                 continue;
             }
-            // 如果是编码器，判断是否支持Mime类型
+            // If it is an encoder, determine whether the Mime type is supported
             String[] types = codecInfo.getSupportedTypes();
             for (int j = 0; j < types.length; j++) {
                 if (types[j].equalsIgnoreCase(mimeType)) {
@@ -368,11 +368,11 @@ public class AACEncodeConsumer extends Thread{
 
 
     private short[] transferByte2Short(byte[] data,int readBytes){
-        // byte[] 转 short[]，数组长度缩减一半
+        // Convert byte[] to short[], reducing the array length by half
         int shortLen = readBytes / 2;
-        // 将byte[]数组装如ByteBuffer缓冲区
+        // Assemble the byte[] array into a ByteBuffer buffer
         ByteBuffer byteBuffer = ByteBuffer.wrap(data, 0, readBytes);
-        // 将ByteBuffer转成小端并获取shortBuffer
+        // Convert ByteBuffer to little endian and get shortBuffer
         ShortBuffer shortBuffer = byteBuffer.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
         short[] shortData = new short[shortLen];
         shortBuffer.get(shortData, 0, shortLen);

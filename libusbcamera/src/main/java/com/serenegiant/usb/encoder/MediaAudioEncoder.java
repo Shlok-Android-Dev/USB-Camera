@@ -23,6 +23,7 @@
 
 package com.serenegiant.usb.encoder;
 
+import android.annotation.SuppressLint;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaCodec;
@@ -52,7 +53,8 @@ public class MediaAudioEncoder extends MediaEncoder implements IAudioEncoder {
 		super(muxer, listener);
 	}
 
-	@Override
+	@SuppressLint("SuspiciousIndentation")
+    @Override
 	protected void prepare() throws IOException {
 		if (DEBUG) Log.v(TAG, "prepare:");
         mTrackIndex = -1;

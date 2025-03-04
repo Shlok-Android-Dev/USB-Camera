@@ -56,7 +56,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Camera业务处理抽象类
+ * Camera business processing abstract class
  */
 public abstract class AbstractUVCCameraHandler extends Handler {
 
@@ -64,7 +64,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
     private static final String TAG = "AbsUVCCameraHandler";
 
 
-    // 对外回调接口
+    // External callback interface
     public interface CameraCallback {
         public void onOpen();
 
@@ -186,13 +186,13 @@ public abstract class AbstractUVCCameraHandler extends Handler {
         if (DEBUG) Log.v(TAG, "close:finished");
     }
 
-    // 切换分辨率
+    // Switch resolution
     public void resize(final int width, final int height) {
         checkReleased();
         throw new UnsupportedOperationException("does not support now");
     }
 
-    // 开启Camera预览
+    // Enable Camera preview
     public void startPreview(final Object surface) {
         checkReleased();
         if (!((surface instanceof SurfaceHolder) || (surface instanceof Surface) || (surface instanceof SurfaceTexture))) {
@@ -206,7 +206,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
         AbstractUVCCameraHandler.mPreviewListener = listener;
     }
 
-    // 关闭Camera预览
+    // Close Camera Preview
     public void stopPreview() {
         if (DEBUG) Log.v(TAG, "stopPreview:");
         removeMessages(MSG_PREVIEW_START);
@@ -239,14 +239,14 @@ public abstract class AbstractUVCCameraHandler extends Handler {
         isCaptureStill = true;
     }
 
-    // 开始录制
+    // Start recording
     public void startRecording(final RecordParams params, OnEncodeResultListener listener) {
         AbstractUVCCameraHandler.mListener = listener;
         checkReleased();
         sendMessage(obtainMessage(MSG_CAPTURE_START, params));
     }
 
-    // 停止录制
+    // Stop recording
     public void stopRecording() {
         sendEmptyMessage(MSG_CAPTURE_STOP);
     }
@@ -259,12 +259,12 @@ public abstract class AbstractUVCCameraHandler extends Handler {
         return mWeakThread.get().getSupportedSizes();
     }
 
-//	// 启动音频线程
+//	// Start the audio thread
 //	public void startAudioThread(){
 //		sendEmptyMessage(MSG_AUDIO_START);
 //	}
 //
-//	// 关闭音频线程
+//	// Close the audio thread
 //	public void stopAudioThread(){
 //		sendEmptyMessage(MSG_AUDIO_STOP);
 //	}
@@ -275,7 +275,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
         sendEmptyMessage(MSG_RELEASE);
     }
 
-    // 对外注册监听事件
+    // Close the audio thread
     public void addCallback(final CameraCallback callback) {
         checkReleased();
         if (!mReleased && (callback != null)) {
@@ -415,11 +415,11 @@ public abstract class AbstractUVCCameraHandler extends Handler {
         private boolean mIsPreviewing;
         private boolean mIsRecording;
 
-        // 播放声音
+        // Play Sound
 //		private SoundPool mSoundPool;
 //		private int mSoundId;
         private AbstractUVCCameraHandler mHandler;
-        // 处理与Camera相关的逻辑，比如获取byte数据流等
+        // Process the logic related to Camera, such as obtaining byte data stream, etc.
         private UVCCamera mUVCCamera;
 
         //		private MediaMuxerWrapper mMuxer;
@@ -429,17 +429,16 @@ public abstract class AbstractUVCCameraHandler extends Handler {
         private String videoPath;
         private boolean isSupportOverlay;
 //		private boolean isAudioThreadStart;
-
         /**
-         * 构造方法
+         * Constructor
          * <p>
-         * clazz 继承于AbstractUVCCameraHandler
-         * parent Activity子类
-         * cameraView 用于捕获静止图像
-         * encoderType 0表示使用MediaSurfaceEncoder;1表示使用MediaVideoEncoder, 2表示使用MediaVideoBufferEncoder
-         * width  分辨率的宽
-         * height 分辨率的高
-         * format 颜色格式，0为FRAME_FORMAT_YUYV；1为FRAME_FORMAT_MJPEG
+         * clazz inherited from AbstractUVCCameraHandler
+         * parent Activity subclass
+         * cameraView is used to capture still images
+         * encoderType 0 means using MediaSurfaceEncoder; 1 means using MediaVideoEncoder, 2 means using MediaVideoBufferEncoder
+         * width resolution width
+         * height resolution height
+         * format color format, 0 is FRAME_FORMAT_YUYV; 1 is FRAME_FORMAT_MJPEG
          * bandwidthFactor
          */
         CameraThread(final Class<? extends AbstractUVCCameraHandler> clazz,
@@ -553,11 +552,11 @@ public abstract class AbstractUVCCameraHandler extends Handler {
             if (DEBUG) Log.v(TAG_THREAD, "handleStartPreview:");
             if ((mUVCCamera == null) || mIsPreviewing) return;
             try {
-            //    mUVCCamera.setPreviewSize(mWidth, mHeight, 1, 31, mPreviewMode, mBandwidthFactor);
+                // mUVCCamera.setPreviewSize(mWidth, mHeight, 1, 31, mPreviewMode, mBandwidthFactor);
                 mUVCCamera.setPreviewSize(mWidth, mHeight, 1, 61, mPreviewMode, mBandwidthFactor);
-                // 获取USB Camera预览数据，使用NV21颜色会失真
-                // 无论使用YUV还是MPEG，setFrameCallback的设置效果一致
-//				mUVCCamera.setFrameCallback(mIFrameCallback, UVCCamera.PIXEL_FORMAT_NV21);
+                // Get USB Camera preview data. Using NV21 will cause color distortion
+                // Whether using YUV or MPEG, the setting effect of setFrameCallback is the same
+                // mUVCCamera.setFrameCallback(mIFrameCallback, UVCCamera.PIXEL_FORMAT_NV21);
                 mUVCCamera.setFrameCallback(mIFrameCallback, UVCCamera.PIXEL_FORMAT_YUV420SP);
             } catch (final IllegalArgumentException e) {
                 try {
@@ -600,7 +599,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
             if (DEBUG) Log.v(TAG_THREAD, "handleStopPreview:finished");
         }
 
-        // 捕获静态图片
+        // Capturing a Still Image
         public void handleCaptureStill(final String path) {
             if (DEBUG) Log.v(TAG_THREAD, "handleCaptureStill:");
             final Activity parent = mWeakParent.get();
@@ -633,7 +632,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
             }
         }
 
-        // 开始录制视频
+        // Start recording video
 //		public void handleStartRecording2(String path) {
 //			if (DEBUG) Log.v(TAG_THREAD, "handleStartRecording:");
 //			try {
@@ -643,7 +642,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
 //				MediaVideoBufferEncoder videoEncoder = null;
 //				switch (mEncoderType) {
 //				case 1:	// for video capturing using MediaVideoEncoder
-//					// 开启视频编码线程
+//					// Start the video encoding thread
 //					new MediaVideoEncoder(muxer,getWidth(), getHeight(), mMediaEncoderListener);
 //					break;
 //				case 2:	// for video capturing using MediaVideoBufferEncoder
@@ -654,7 +653,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
 //					new MediaSurfaceEncoder(muxer, getWidth(), getHeight(), mMediaEncoderListener);
 //					break;
 //				}
-//				// 开启音频编码线程
+//				// Start the audio encoding thread
 //				if (true) {
 //					// for audio capturing
 ////					new MediaAudioEncoder(muxer, mMediaEncoderListener);
@@ -681,10 +680,10 @@ public abstract class AbstractUVCCameraHandler extends Handler {
         public void handleStartPusher(RecordParams params) {
             if ((mUVCCamera == null) || (mH264Consumer != null))
                 return;
-//			// 获取USB Camera预览数据
+//			// Get USB Camera preview data. Using NV21 will cause color distortion
 //			mUVCCamera.setFrameCallback(mIFrameCallback, UVCCamera.PIXEL_FORMAT_NV21);
 
-            // 初始化混合器
+            // Initialize the mixer
             if (params != null) {
                 isSupportOverlay = params.isSupportOverlay();
                 if(isSupportOverlay) {
@@ -699,9 +698,9 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                 mMuxer = new Mp4MediaMuxer(params.getRecordPath(),
                         params.getRecordDuration() * 60 * 1000, params.isVoiceClose());
             }
-            // 启动视频编码线程
+            // Start the video encoding thread
             startVideoRecord();
-            // 启动音频编码线程
+            // Start the audio encoding thread
             if (params != null && !params.isVoiceClose()) {
                 startAudioRecord();
             }
@@ -710,25 +709,25 @@ public abstract class AbstractUVCCameraHandler extends Handler {
 
 
         public void handleStopPusher() {
-            // 停止混合器
+            // Stop the mixer
             if (mMuxer != null) {
                 mMuxer.release();
                 mMuxer = null;
-                Log.i(TAG, TAG + "---->停止本地录制");
+                Log.i(TAG, TAG + "---->Stop local recording<----");
             }
-            // 停止音视频编码线程
+            // Stop the audio and video encoding thread
             stopAudioRecord();
             stopVideoRecord();
             if(isSupportOverlay)
                 TxtOverlay.getInstance().release();
-//			// 停止捕获视频数据
+//			// Stop capturing video data
 //			if (mUVCCamera != null) {
 //				mUVCCamera.stopCapture();
 //			}
             mWeakCameraView.get().setVideoEncoder(null);
             // you should not wait here
             callOnStopRecording();
-            // 返回路径
+            // Return Path
             if (mListener != null) {
                 mListener.onRecordResult(videoPath + ".mp4");
             }
@@ -745,7 +744,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                 }
             });
             mH264Consumer.start();
-            // 添加混合器
+            // Adding a Mixer
             if (mMuxer != null) {
                 if (mH264Consumer != null) {
                     mH264Consumer.setTmpuMuxer(mMuxer);
@@ -781,7 +780,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                 }
             });
             mAacConsumer.start();
-            // 添加混合器
+            // Adding a Mixer
             if (mMuxer != null) {
                 if (mAacConsumer != null) {
                     mAacConsumer.setTmpuMuxer(mMuxer);
@@ -917,7 +916,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
             if (DEBUG) Log.v(TAG_THREAD, "handleRelease:finished");
         }
 
-        // 自动对焦
+        // Autofocus
         public void handleCameraFoucs() {
             if (DEBUG) Log.v(TAG_THREAD, "handleStartPreview:");
             if ((mUVCCamera == null) || !mIsPreviewing)
@@ -925,7 +924,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
             mUVCCamera.setAutoFocus(true);
         }
 
-        // 获取支持的分辨率
+        // Get supported resolutions
         public List<Size> getSupportedSizes() {
             if ((mUVCCamera == null) || !mIsPreviewing)
                 return null;
