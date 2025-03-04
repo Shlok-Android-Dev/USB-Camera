@@ -3,6 +3,8 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion rootProject.ext.versionCompiler
     defaultConfig {
+
+        //to run this repo go to the gradle and set Gradle 11 on Android Studio settings
         applicationId "com.shlok.usbcamera"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.versionTarget
